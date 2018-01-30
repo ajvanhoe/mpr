@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Middleware\VerifiedUser;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -11,10 +11,11 @@
 |
 */
 
-
 Route::get('/', function () {
-    return view('index');
+    return view('welcome');
 });
+Route::get('/dashboard', 'HomeController@index');
+
 
 
 
@@ -48,3 +49,6 @@ Route::get('/', function () {
 
 
 */
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

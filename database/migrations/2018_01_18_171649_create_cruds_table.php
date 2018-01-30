@@ -24,7 +24,7 @@ class CreateCrudsTable extends Migration
             // u koloni pare je uvek pozitivan broj
             $table->unsignedDecimal('pare', 10, 8)->default(0.0);   
             // dozvoljava da se unesu true i false vrednosti kao default
-            $table->string('peder')->nullable($value = true)
+            $table->string('peder')->nullable($value = true);
             $table->timestamps();
         });
     }
