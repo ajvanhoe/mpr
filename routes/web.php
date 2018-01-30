@@ -17,6 +17,8 @@ Route::get('/', function () {
 Route::get('/dashboard', 'HomeController@index');
 
 
+Route::get('/email', 'HomeController@sendMail')->name('send-email');
+Route::get('verify/{verify}', 'HomeController@verificatedUser')->name('verificated-user');
 
 
 

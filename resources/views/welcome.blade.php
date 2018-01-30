@@ -65,11 +65,14 @@
 
                 <div class="links">
                    
-                     @if (Route::has('login'))
+               @if (Route::has('login'))
                 
                     @auth
                         @if(auth()->user()->verified == 1)
                         <a class="btn btn-primary" href="{{ url('/dashboard') }}">Home</a>
+                        @else
+                         <a class="btn btn-primary" class="btn btn-succe" href="{{ route('send-email') }}">email</a>
+
                         @endif
 
                     @else
@@ -77,8 +80,9 @@
                         <a class="btn btn-primary" class="btn btn-succe" href="{{ route('register') }}">Register</a>
                     @endauth
                      
-            @endif
-
+                 @endif
+                 
+                
                 </div>
             </div>
         </div>
