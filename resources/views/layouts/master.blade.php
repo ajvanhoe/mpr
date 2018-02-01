@@ -35,7 +35,7 @@
 </head>
 <body>
 
-	
+	<!--@yield('header') -->
 	@include('partials.header_a')
 
 	@yield('content')

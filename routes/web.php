@@ -41,6 +41,41 @@ Route::get('/faucets', function () {
 });
 
 
+
+
+
+Route::get('/api', function () {
+
+
+	$apika = file_get_contents('https://api.coinmarketcap.com/v1/ticker/cardano/');
+
+	$arej = json_decode($apika);
+	$final = array_shift($arej);
+	//dd($final);
+
+
+
+    return view('theapi', compact('final'));
+});
+
+
+
+
+
+
+
+Route::get('/coin', function () {
+   return view('coin');
+});
+
+
+
+Route::get('/coin/{$id}', function ($id) {
+   return view('coin');
+});
+
+
+
 /*
 Route::get('/', function () {
     return view('welcome');

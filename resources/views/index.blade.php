@@ -21,7 +21,9 @@
 						<li><a href="/page">page</a></li>
 						<li><a href="/helpers">helpers</a></li>
 						<li><a href="/crud">crud</a></li>							
-						<li><a href="/faucets">faucets</a></li>							
+						<li><a href="/faucets">faucets</a></li>	
+						<li><a href="/api">api</a></li>	
+						<li><a href="/coin">coin</a></li>								
  					</ul>
 
  					<hr>
