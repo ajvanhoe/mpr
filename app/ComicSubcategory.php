@@ -10,12 +10,15 @@ class ComicSubcategory extends Model
 	protected $table = "comic_subcategories";
     protected $fillable = [
         'title', 
-        'description', 
+        //'description', 
         'category_id',
         'parent_id'
 
 
     ];
+
+    public $timestamps = false;
+    
 
     public function sub_subcats() {
       

@@ -17,7 +17,7 @@ class CreateBookMediaTable extends Migration
             $table->increments('id');
             $table->string('file');
             $table->integer('book_id')->unsigned();
-            $table->timestamps();
+           // $table->timestamps();
 
             
         });

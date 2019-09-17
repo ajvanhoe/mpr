@@ -17,7 +17,7 @@ class CreateAlbumMediaTable extends Migration
             $table->increments('id');
             $table->string('file');
             $table->integer('album_id')->unsigned();
-            $table->timestamps();
+           // $table->timestamps();
 
            // $table->foreign('album_id')->references('id')->on('albums');
         });

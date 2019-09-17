@@ -17,17 +17,19 @@ class CreateBooksTable extends Migration
             $table->increments('id');
 
             $table->string('title');                        
-            $table->string('author')->default('nepoznat');
-            $table->string('publisher')->default('nepoznato');   
+            $table->string('author')->nullable()->default('nepoznat');
+            $table->string('publisher')->nullable()->default('nepoznato');
+            $table->string('press')->nullable()->default('nepoznato');    
+           
             $table->string('year')->nullable();         
             $table->string('edition')->nullable();  
             $table->text('description')->nullable();     
 
-            $table->string('code')->default('nema');     
+            $table->string('code')->nullable()->default('nema');     
             $table->integer('price')->nullable();      
 
-            $table->string('category')->default('nedefinisano');        
-            $table->string('subcategory')->default('nedefinisano');  
+            $table->string('category')->nullable()->default('nedefinisano');        
+            $table->string('subcategory')->nullable()->default('nedefinisano');  
 
             $table->timestamps();
         });

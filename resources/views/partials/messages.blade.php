@@ -21,8 +21,6 @@
 	</div>
 @endif
 
-
-
 @if(session('info'))
 <div class="alert alert-info alert-dismissable">
 	<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
@@ -32,3 +30,15 @@
 		@endif
 </div>
 @endif
+
+@if (session('status'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+    	 {{ session('status') }}
+
+    	 @if(session('alert-link'))
+			&nbsp;&nbsp;<i class="fa fa-arrow-circle-right"></i>&nbsp;<a href="{{ session('alert-link') }}" class="alert-link">{{ session('alert-link-text')}}</a>.
+		@endif
+    </div>
+@endif
+

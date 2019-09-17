@@ -10,11 +10,20 @@ class AlbumSubcategory extends Model
     protected $table = "album_subcategories";
     protected $fillable = [
         'title', 
-        'description', 
+        //'description', 
         'category_id',
         'parent_id'
 
     ];
+
+    public $timestamps = false;
+    
+
+    public function getCategory() {
+       return $this->belongsTo('App\AlbumCategory', 'category_id', 'id');
+    }
+
+
 
     public function sub_subcats() {
         

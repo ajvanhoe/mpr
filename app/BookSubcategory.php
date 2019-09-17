@@ -10,11 +10,15 @@ class BookSubcategory extends Model
     protected $table = "book_subcategories";
     protected $fillable = [
         'title', 
-        'description', 
+        //'description', 
         'category_id',
         'parent_id'
 
     ];
+
+    public $timestamps = false;
+    
+    
     public function sub_subcats() {
       
     	$subcats = DB::table('book_subcategories')

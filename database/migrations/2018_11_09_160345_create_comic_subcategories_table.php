@@ -15,13 +15,12 @@ class CreateComicSubcategoriesTable extends Migration
     {
         Schema::create('comic_subcategories', function (Blueprint $table) {
             $table->increments('id');
-
             $table->string('title');
-            $table->string('description')->default('none');
             $table->integer('category_id');     // bitno + dodati key
             $table->integer('parent_id')->unsigned()->nullable()->default(null);
             
-            $table->timestamps();
+            //$table->string('description')->default('none');
+            //$table->timestamps();
         });
     }
 

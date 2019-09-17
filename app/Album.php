@@ -10,17 +10,18 @@ class Album extends Model
     protected $table = 'albums';
 
     protected $fillable = [
-
         'title', 
+        'type', 
+        
         'publisher', 
+        'press',
         'year', 
         'edition', 
+        'description', 
 
         'code', 
-        'description', 
         'price', 
-        
-        'type', 
+
         'category', 
         'subcategory',
     ];

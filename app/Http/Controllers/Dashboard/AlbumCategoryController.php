@@ -18,96 +18,56 @@ class AlbumCategoryController extends Controller
 
     //**********************************************************************************************//
     
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
 
-        //return view('admin.album-categories');
-
-         $categories = Category::all();
-         return view('admin.album-categories')->with('categories', $categories);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         
         $this->validate($request, [
-            'title'     => 'required',
+            'title'     => ['required', 'unique:album_categories']
         ]);
 
         Category::create($request->all());
-        return redirect('/dashboard/albumi/categories/index')->with('success', 'Nova kategorija dodata!');
+        return redirect('/dashboard/categories/albums')->with('success', 'Nova kategorija dodata!');
     }
 
-   
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\AlbumCategory  $albumCategory
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        $category = Category::findOrFail($id);
-     
-        // $this->validate($request, [
-        //     'title'     => 'required',
-        // ]);
-        
-        if($request->title !== null){
-        $category->title = $request->title;
-        }
-        
-        $category->description = $request->description;
-       
 
-        $category->save();
-
-        return redirect('/dashboard/albumi/categories/'.$id.'/subcategories')->with('success', 'Kategorija je promenjena!');
-
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\AlbumCategory  $albumCategory
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         
         $subcats = Subcategory::where('category_id', $id)->get();
 
         foreach($subcats as $subcat){
-        $subcat->delete();
+        	$subcat->delete();
         }
 
-        $category = Category::findOrFail($id);
-        $category->delete();
+	        $category = Category::findOrFail($id);
+	        $category->delete();
 
-        return redirect('/dashboard/albumi/categories/index')->with('success', 'Kategorija obrisana!');
+        return redirect('/dashboard/categories/albums')->with('success', 'Kategorija obrisana!');
 
     }
+
+    public function store_subcat(Request $request)
+    {
+        
+        $this->validate($request, [
+            'title'     => 'required',
+            'category_id'   => 'required',
+        ]);
+
+        Subcategory::create($request->all());
+        return redirect('/dashboard/categories/albums')->with('success', 'Nova podkategorija dodata!');
+    }
+
+
+    public function destroy_subcat($id)
+    {
+        $subcategory = Subcategory::findOrFail($id);
+        $subcategory->delete();
+
+        return redirect('/dashboard/categories/albums')->with('success', 'Podkategorija obrisana!');
+
+    }
+
+
 }
-
-
-/*
-
-$table->dropForeign('answers_user_id_foreign');
-$table->foreign('user_id')
-->references('id')->on('users')
-->onDelete('cascade');
-
-
-*/

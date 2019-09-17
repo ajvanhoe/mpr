@@ -15,11 +15,9 @@ class CreateComicCategoriesTable extends Migration
     {
         Schema::create('comic_categories', function (Blueprint $table) {
             $table->increments('id');
-
             $table->string('title');
-            $table->string('description')->nullable()->default('none'); 
-
-            $table->timestamps();
+           // $table->string('description')->nullable()->default('none'); 
+           //$table->timestamps();
         });
     }
 

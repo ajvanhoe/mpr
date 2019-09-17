@@ -6,8 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Comic as Comic;
-use App\ComicCategory as Category;
-use App\ComicSubcategory as Subcategory;
+use App\ComicMedia as Media;
 
 class ComicController extends Controller
 {
@@ -18,103 +17,97 @@ class ComicController extends Controller
 
     //**********************************************************************************************//
 
-
-    public function create()
-    {
-       $categories = Category::all();
-       return view('admin.comic-create')->with('categories', $categories);
-    }
-
-    public function store(Request $request)
-    {
+    public function store(Request $request, $id) {
         $this->validate($request, [
-            'title' 	=> 'required',
-			'category'  => 'required'
+            'title'     => 'required',
         ]);
 
-       
-        $strip = Comic::create($request->all());
-        $id = $strip->id;
+        // prebacuje $request u arej
+        $input = $request->all(); 
 
-        //redirekt
-		return redirect('/dashboard/stripovi/'.$id.'/media')->with('success', 'Novi strip dodat!');
-		
-		
-    }
+        $resource = Comic::findOrFail($id);
+        $db_fields = array_keys($resource->getAttributes()); 
 
-
-    public function show($id=null)
-    {
-
-        if(!$id) {
-            return redirect('/dashboard/stripovi')->with('error', 'Nepoznat strip!');
-        }
-
-		$strip = Comic::find($id);
-        $slike = $strip->media;
-      
-        $naslovna = $slike->shift();
-
-        return view('admin.comic')->with('strip', $strip)->with('slike', $slike)->with('naslovna', $naslovna);
-       
-    }
-
-    public function edit($id=null)
-    {
-        if(!$id) {
-            return redirect('/dashboard/stripovi/index')->with('error', 'Nepoznat strip!');
-        }
-
-		$strip = Comic::findOrFail($id);
-        $categories = Category::all();
-
-        $slike = $strip->media;
-
-        $category = Category::where('title', $strip->category)->limit(1)->get()->shift();
-        if ($category) {
-        $subcategories = Subcategory::where('category_id', $category->id)->get();
-        } else {
-           $subcategories = null; 
-        } 
-               
-      	return view('admin.comic-edit')->with('strip', $strip)
-                                       ->with('slike', $slike)
-                                       ->with('categories', $categories)
-                                       ->with('subcategories', $subcategories);
-    }
-
-    public function update(Request $request, $id)
-    {
-
-       // prebacuje $request u arej
-       $input = $request->all(); 
-	 
-       
-	   $strip = Comic::findOrFail($id);
-       $db_fields = array_keys($strip->getAttributes()); 
-
-      
+       // moze i ovako
+       //$fields = array_keys($album->getOriginal());
 
        // dodeljuje vrednosti
-       foreach ($db_fields as $field) {
+        foreach ($db_fields as $field) {
             if (array_key_exists($field, $input) && isset($input[$field])) {
-                $strip->$field = $input[$field];
+                $resource->$field = $input[$field];
             }
         }
 
-    	//save
-		$strip->save();
-		
-		//redirekt
-		return redirect('/dashboard/stripovi/create')->with('success', 'Strip je sačuvan!');
-	}
+        //save
+        $resource->save();
 
-	public function destroy($id)
-    {
-		$strip = Comic::findOrFail($id);
-		$strip->delete();
-		return redirect('/dashboard/stripovi')->with('success', 'Strip obrisan!');
-		
+        $id = $resource->id;
+        return redirect('/dashboard/create/comic/'.$id)->with('success', 'Novi strip je dodat!');
     }
+
+
+
+    // edit
+
+
+
+    // delete
+
+    public function destroy($id) {
+        $comic = Comic::where('id', $id)->delete();
+        $media = Media::where('comic_id', $id)->get();
+
+        foreach ($media as $entry) {
+            $file_path = public_path('media/comics/'.$entry->file); 
+            if(file_exists($file_path)) {unlink($file_path);}
+            $entry->delete();
+        }
+
+        return redirect('/dashboard/comics')->with('success', 'Strip je obrisan!');
+    }
+
+
+
+
+
+    // store media
+    public function store_media(Request $request, $id)
+    {
+        $this->validate($request, [
+            'file'  => 'image|nullable|max:1024'
+        ]); 
+      
+        $media = new Media;
+
+        if ($request->hasFile('file')) {
+
+            // Get filename with the extension
+            $fileNameWithExt = $request->file('file')->getClientOriginalName();
+            // Get just filename
+            $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+            // Get just extension
+            $ext = $request->file('file')->getClientOriginalExtension();
+            // Filename to store
+            $fileNameToStore = $id.'-'.time().'-'.$filename.'.'.$ext;
+
+            $request->file('file')->move('media/comics', $fileNameToStore);
+            $media->file = $fileNameToStore;
+        }
+
+        $media->comic_id = $id;
+        $media->save();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

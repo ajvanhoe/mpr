@@ -19,37 +19,16 @@ class BookCategoryController extends Controller
     //**********************************************************************************************//
   
   
-    public function index()
-    {
-         $categories = Category::all();
-         return view('admin.book-categories')->with('categories', $categories);
-    }
-
 
     public function store(Request $request)
     {
         
         $this->validate($request, [
-            'title'     => 'required',
+            'title'     => ['required', 'unique:book_categories']
         ]);
 
         Category::create($request->all());
-        return redirect('/dashboard/knjige/categories/index')->with('success', 'Nova kategorija dodata!');
-    }
-
-    public function update(Request $request, $id)
-    {
-        $category = Category::findOrFail($id);
-             
-        if($request->title !== null){
-        $category->title = $request->title;
-        }
-        
-        $category->description = $request->description;
-        $category->save();
-
-        return redirect('/dashboard/knjige/categories/'.$id.'/subcategories')->with('success', 'Kategorija je promenjena!');
-
+        return redirect('/dashboard/categories/books')->with('success', 'Nova kategorija dodata!');
     }
 
 
@@ -59,15 +38,36 @@ class BookCategoryController extends Controller
         $subcats = Subcategory::where('category_id', $id)->get();
 
         foreach($subcats as $subcat){
-        $subcat->delete();
+        	$subcat->delete();
         }
 
-        $category = Category::findOrFail($id);
-        $category->delete();
+	        $category = Category::findOrFail($id);
+	        $category->delete();
 
-        return redirect('/dashboard/knjige/categories/index')->with('success', 'Kategorija obrisana!');
+        return redirect('/dashboard/categories/books')->with('success', 'Kategorija obrisana!');
 
     }
 
+    public function store_subcat(Request $request)
+    {
+        
+        $this->validate($request, [
+            'title'         => 'required',
+            'category_id'   => 'required',
+        ]);
+
+        Subcategory::create($request->all());
+        return redirect('/dashboard/categories/books')->with('success', 'Nova podkategorija dodata!');
+    }
+
+
+    public function destroy_subcat($id)
+    {
+        $subcategory = Subcategory::findOrFail($id);
+        $subcategory->delete();
+
+        return redirect('/dashboard/categories/books')->with('success', 'Podkategorija obrisana!');
+
+    }
 
 }

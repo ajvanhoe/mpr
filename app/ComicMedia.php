@@ -10,6 +10,9 @@ class ComicMedia extends Model
     protected $fillable = ['file'];
 
 
+    public $timestamps = false;
+    
+
     public function comic() {
         return $this->belongsTo(Comic::class);
     }

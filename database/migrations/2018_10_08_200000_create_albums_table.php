@@ -16,18 +16,20 @@ class CreateAlbumsTable extends Migration
         Schema::create('albums', function (Blueprint $table) {
             $table->increments('id');
 		    $table->string('title');                        
-			$table->string('publisher')->default('nepoznato');     
+			$table->string('publisher')->nullable()->default('nepoznato');     
+            $table->string('press')->nullable()->default('nepoznato');     
 			$table->string('year')->nullable();         
 			$table->integer('edition')->nullable();     
 			
-			$table->string('code')->default('nema');     
+			$table->string('code')->nullable()->default('nema');     
 			$table->text('description')->nullable();     
 			$table->integer('price')->nullable();        
 			
             // 'popunjeni', 'prazni', 'zapopunjavanje', 'materijali', 'slabopopunjeni'  
-			$table->string('type')->default('nedefinisano');                 
-			$table->string('category')->default('nedefinisano');        
-			$table->string('subcategory')->default('nedefinisano');  
+			$table->string('type')->nullable()->default('nedefinisano'); 
+                            
+			$table->string('category')->nullable()->default('nedefinisano');        
+			$table->string('subcategory')->nullable()->default('nedefinisano');  
 			
             $table->timestamps();
 

@@ -15,12 +15,9 @@ class CreateComicMediaTable extends Migration
     {
         Schema::create('comic_media', function (Blueprint $table) {
             $table->increments('id');
-
             $table->string('file');
             $table->integer('comic_id')->unsigned();
-
-
-            $table->timestamps();
+           // $table->timestamps();
         });
     }
 

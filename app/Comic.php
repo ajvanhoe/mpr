@@ -9,10 +9,11 @@ class Comic extends Model
     protected $table = 'comics';
 
     protected $fillable = [
-
         'title', 
         'author',
+
         'publisher', 
+        'press',
         'year', 
         'edition', 
         'description', 

@@ -11,174 +11,150 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
+
+/*** PUBLIC AREA ***/
+
+Route::get('/', 'FrontController@frontpage')->name('frontpage');
+Route::get('/kontakt', 'FrontController@contact')->name('contact');
+
+Route::get('/prodavnica/{type}/', 'FrontController@index')->name('index');
+Route::get('/prodavnica/{type}/prikaz/{id}', 'FrontController@show')->name('public.show');
 
 
-Route::get('/kontakt', function () {
-    return view('kontakt');
-})->name('kontakt');
-
-
-
-
-/* Albumi - generalno */
-
-// index
-Route::get('/albumi', 'AlbumController@index')->name('public.index.albuma');
-// album show
-Route::get('/album/{id}', 'AlbumController@show')->name('public.show.album');
-
-/* Knjige - generalno */
-
-// index
-Route::get('/knjige', 'BookController@index')->name('public.index.knjiga');
-// show
-Route::get('/knjiga/{id}', 'BookController@show')->name('public.show.knjiga');
-
-
-/* Stripovi - generalno */
-
-// index
-Route::get('/stripovi', 'ComicController@index')->name('public.index.stripova');
-// show
-Route::get('/strip/{id}', 'ComicController@show')->name('public.show.strip');
-
-
-/* Search */
-Route::post('/pretraga', 'SearchController@search')->name('public.search');
+Route::name('search.')->group(function () {
+	Route::post('/search/{type}', 'SearchController@search')->name('string');	
+	Route::get('/search/category/{type}/{category}/{subcategory?}', 'SearchController@searchByCategory')->name('category');
+});
 
 
 
+/*** AUTH AREA ***/
 
 Auth::routes();
 
-
-
-/***** ADMIN PANEL *****/
-
-
 Route::group(['middleware'=>'auth'], function(){
 
-Route::get('/home', 'HomeController@index')->name('dashboard');
-//Route::get('/settings', 'HomeController@settings')->name('settings');
-Route::get('/dashboard/categories', 'HomeController@categories')->name('categories');
+	Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
+	Route::get('/dashboard/categories/', 'HomeController@categories')->name('categories');
 
-/* Albumi */
+	/** CRUD **/
 
-// admin albumi
-Route::get('/dashboard/albumi', 'HomeController@albumi')->name('admin.index.albuma');
-//Route::get('/dashboard/albumi/index', 'HomeController@albumi')->name('admin.index.albuma');
-// show
-Route::get('/dashboard/albumi/{id}/show', 'Dashboard\AlbumController@show')->name('show.album');
-// albumi edit
-Route::get('/dashboard/albumi/{id}/edit', 'Dashboard\AlbumController@edit')->name('edit.album');
-Route::post('/dashboard/albumi/{id}/edit', 'Dashboard\AlbumController@update')->name('update.album');
-// album delete
-Route::post('/dashboard/albumi/{id}/delete', 'Dashboard\AlbumController@destroy')->name('delete.album');
+	Route::name('show.')->group(function () {
+		Route::get('/dashboard/books/{id?}', 'HomeController@book')->name('book');
+		Route::get('/dashboard/comics/{id?}', 'HomeController@comic')->name('comic');
+		Route::get('/dashboard/albums/{id?}', 'HomeController@album')->name('album');
+		Route::get('/dashboard/items/{id?}', 'HomeController@item')->name('item');
+	});
 
-// albumi create&store
-Route::get('/dashboard/albumi/create', 'Dashboard\AlbumController@create')->name('create.album');
-Route::post('/dashboard/albumi/create', 'Dashboard\AlbumController@store')->name('store.album');
-// upload slika & resto
-Route::get('/dashboard/albumi/{id}/media', 'Dashboard\AlbumMediaController@create')->name('album.media');
-Route::post('/dashboard/albumi/{id}/media', 'Dashboard\AlbumMediaController@store')->name('store.album.media');
-// brisanje pojedinacne slike
-Route::get('/dashboard/albumi/media/{id}/delete', 'Dashboard\AlbumMediaController@destroy')->name('delete.album.media');
+	Route::name('create.')->group(function () {
+		Route::get('/dashboard/create/book/{id?}', 'HomeController@add_book')->name('book');
+		Route::get('/dashboard/create/comic/{id?}', 'HomeController@add_comic')->name('comic');
+		Route::get('/dashboard/create/album/{id?}', 'HomeController@add_album')->name('album');
+		Route::get('/dashboard/create/item/{id?}', 'HomeController@add_item')->name('item');
+	});
 
-/* Kategorije Albuma */
+	Route::name('store.')->group(function () {
+		Route::post('/dashboard/create/book/{id}', 'Dashboard\BookController@store')->name('book');
+		Route::post('/dashboard/create/comic/{id}', 'Dashboard\ComicController@store')->name('comic');
+		Route::post('/dashboard/create/album/{id}', 'Dashboard\AlbumController@store')->name('album');
+		Route::post('/dashboard/create/item/{id}', 'Dashboard\ItemController@store')->name('item');
+	});
 
-Route::get('/dashboard/albumi/categories/index', 'Dashboard\AlbumCategoryController@index')->name('albumi.index.kategorija');
-Route::post('/dashboard/albumi/categories/index', 'Dashboard\AlbumCategoryController@store')->name('store.album.category');
-Route::post('/dashboard/albumi/categories/{id}/edit', 'Dashboard\AlbumCategoryController@update')->name('edit.album.category');
-Route::post('/dashboard/albumi/categories/{id}/delete', 'Dashboard\AlbumCategoryController@destroy')->name('delete.album.category');
-
-/* Podkategorije Albuma */
-Route::get('/dashboard/albumi/categories/{category}/subcategories', 'Dashboard\AlbumSubcategoryController@index')->name('index.album.subcategory');
-Route::post('/dashboard/albumi/categories/{category}/subcategories', 'Dashboard\AlbumSubcategoryController@store')->name('store.album.subcategory');
-Route::get('/dashboard/albumi/categories/remove-subcategory/{id}', 'Dashboard\AlbumSubcategoryController@destroy')->name('delete.album.subcategory');
+	// cancel entry
+	Route::get('/dashboard/cancel', 'HomeController@cancel')->name('cancel');
+	 
 
 
+	/* Media */
+	Route::name('store.media.')->group(function () {
+		Route::post('/dashboard/media/book/{id}', 'Dashboard\BookController@store_media')->name('book');
+		Route::post('/dashboard/media/comic/{id}', 'Dashboard\ComicController@store_media')->name('comic');
+		Route::post('/dashboard/media/album/{id}', 'Dashboard\AlbumController@store_media')->name('album');
+		Route::post('/dashboard/media/item/{id}', 'Dashboard\ItemController@store_media')->name('item');
+	});
 
-/* KNJIGE */ 
+	// Route::name('remove.media.')->group(function () {
+	// 	Route::post('/dashboard/media/book/{id}/remove', 'Dashboard\BookController@store_media')->name('book');
+	// 	Route::post('/dashboard/media/comic/{id}/remove', 'Dashboard\ComicController@store_media')->name('comic');
+	// 	Route::post('/dashboard/media/album/{id}/remove', 'Dashboard\AlbumController@store_media')->name('album');
+	// 	Route::post('/dashboard/media/item/{id}/remove', 'Dashboard\ItemController@store_media')->name('item');
+	// });
 
+	/* *** */
 
+	// Route::name('edit.')->group(function () {
+	// 	Route::get('/dashboard/books/{id}/edit', 'Dashboard\BookController@edit')->name('book');
+	// 	Route::get('/dashboard/comics/{id}/edit', 'Dashboard\ComicController@edit')->name('comic');
+	// 	Route::get('/dashboard/albums/{id}/edit', 'Dashboard\AlbumController@edit')->name('album');
+	// 	Route::get('/dashboard/items/{id}/edit', 'Dashboard\ItemController@edit')->name('item');
+	// });
+	
+	Route::get('/dashboard/{type}/edit/{id}', 'HomeController@edit')->name('edit');
+	Route::post('/dashboard/{type}/edit/{id}', 'HomeController@update')->name('update');
+	Route::post('/dashboard/media/{type}/remove/{id}', 'HomeController@remove_media')->name('remedia');
 
-// admin knjige
-Route::get('/dashboard/knjige', 'HomeController@knjige')->name('admin.index.knjiga');
+	// Route::name('update.')->group(function () {
+	// 	Route::post('/dashboard/books/{id}/edit', 'Dashboard\BookController@update')->name('book');
+	// 	Route::post('/dashboard/comics/{id}/edit', 'Dashboard\ComicController@update')->name('comic');
+	// 	Route::post('/dashboard/albums/{id}/edit', 'Dashboard\AlbumController@update')->name('album');
+	// 	Route::post('/dashboard/items/{id}/edit', 'Dashboard\ItemController@update')->name('item');
+	// });
+	
+	Route::name('remove.')->group(function () {
+		Route::post('/dashboard/books/{id}/remove', 'Dashboard\BookController@destroy')->name('book');
+		Route::post('/dashboard/comics/{id}/remove', 'Dashboard\ComicController@destroy')->name('comic');
+		Route::post('/dashboard/albums/{id}/remove', 'Dashboard\AlbumController@destroy')->name('album');
+		Route::post('/dashboard/items/{id}/remove', 'Dashboard\ItemController@destroy')->name('item');
+	});
 
-// show
-Route::get('/dashboard/knjiga/{id}', 'Dashboard\BookController@show')->name('show.knjiga');
-// edit
-Route::get('/dashboard/knjige/{id}/edit', 'Dashboard\BookController@edit')->name('edit.knjiga');
-Route::post('/dashboard/knjige/{id}/edit', 'Dashboard\BookController@update')->name('update.knjiga');
-// delete
-Route::post('/dashboard/knjige/{id}/delete', 'Dashboard\BookController@destroy')->name('delete.knjiga');
+	/** CATEGORIES CRUD **/ 
 
-//  create&store
-Route::get('/dashboard/knjige/create', 'Dashboard\BookController@create')->name('create.knjiga');
-Route::post('/dashboard/knjige/create', 'Dashboard\BookController@store')->name('store.knjiga');
-// upload slika & resto
-Route::get('/dashboard/knjige/{id}/media', 'Dashboard\BookMediaController@create')->name('knjiga.media');
-Route::post('/dashboard/knjige/{id}/media', 'Dashboard\BookMediaController@store')->name('store.knjiga.media');
-// brisanje pojedinacne slike
-Route::get('/dashboard/knjige/media/{id}/delete', 'Dashboard\BookMediaController@destroy')->name('delete.knjiga.media');
+	Route::name('show.category.')->group(function () {
+	 Route::get('/dashboard/categories/books', 'HomeController@book_categories')->name('book');
+	 Route::get('/dashboard/categories/comics', 'HomeController@comic_categories')->name('comic');
+	 Route::get('/dashboard/categories/albums', 'HomeController@album_categories')->name('album');
+	 Route::get('/dashboard/categories/items', 'HomeController@item_categories')->name('item');
+	});
 
-/* Kategorije knjiga */
-
-Route::get('/dashboard/knjige/categories/index', 'Dashboard\BookCategoryController@index')->name('knjige.index.kategorija');
-Route::post('/dashboard/knjige/categories/index', 'Dashboard\BookCategoryController@store')->name('store.knjiga.category');
-Route::post('/dashboard/knjige/categories/{id}/edit', 'Dashboard\BookCategoryController@update')->name('edit.knjiga.category');
-Route::post('/dashboard/knjige/categories/{id}/delete', 'Dashboard\BookCategoryController@destroy')->name('delete.knjiga.category');
-
-/* Podkategorije knjiga */
-Route::get('/dashboard/knjige/categories/{category}/subcategories', 'Dashboard\BookSubcategoryController@index')->name('index.knjiga.subcategory');
-Route::post('/dashboard/knjige/categories/{category}/subcategories', 'Dashboard\BookSubcategoryController@store')->name('store.knjiga.subcategory');
-Route::get('/dashboard/knjige/categories/remove-subcategory/{id}', 'Dashboard\BookSubcategoryController@destroy')->name('delete.knjiga.subcategory');
-
-/* STRIPOVI */
-
-// admin stripovi
-Route::get('/dashboard/stripovi', 'HomeController@stripovi')->name('admin.index.stripova');
-
-// show
-Route::get('/dashboard/strip/{id}', 'Dashboard\ComicController@show')->name('show.strip');
-// stripovi edit
-Route::get('/dashboard/stripovi/{id}/edit', 'Dashboard\ComicController@edit')->name('edit.strip');
-Route::post('/dashboard/stripovi/{id}/edit', 'Dashboard\ComicController@update')->name('update.strip');
-// stripovidelete
-Route::post('/dashboard/stripovi/{id}/delete', 'Dashboard\ComicController@destroy')->name('delete.strip');
-
-// stripovi create&store
-Route::get('/dashboard/stripovi/create', 'Dashboard\ComicController@create')->name('create.strip');
-Route::post('/dashboard/stripovi/create', 'Dashboard\ComicController@store')->name('store.strip');
-// upload slika & resto
-Route::get('/dashboard/stripovi/{id}/media', 'Dashboard\ComicMediaController@create')->name('strip.media');
-Route::post('/dashboard/stripovi/{id}/media', 'Dashboard\ComicMediaController@store')->name('store.strip.media');
-// brisanje pojedinacne slike
-Route::get('/dashboard/stripovi/media/{id}/delete', 'Dashboard\ComicMediaController@destroy')->name('delete.strip.media');
-
-/* Kategorije stripova */
-Route::get('/dashboard/stripovi/categories/index', 'Dashboard\ComicCategoryController@index')->name('stripovi.index.kategorija');
-Route::post('/dashboard/stripovi/categories/index', 'Dashboard\ComicCategoryController@store')->name('store.strip.category');
-Route::post('/dashboard/stripovi/categories/{id}/edit', 'Dashboard\ComicCategoryController@update')->name('edit.strip.category');
-Route::post('/dashboard/stripovi/categories/{id}/delete', 'Dashboard\ComicCategoryController@destroy')->name('delete.strip.category');
-
-/* Podkategorije stipova */
-Route::get('/dashboard/stripovi/categories/{category}/subcategories', 'Dashboard\ComicSubcategoryController@index')->name('index.strip.subcategory');
-Route::post('/dashboard/stripovi/categories/{category}/subcategories', 'Dashboard\ComicSubcategoryController@store')->name('store.strip.subcategory');
-Route::get('/dashboard/stripovi/categories/remove-subcategory/{id}', 'Dashboard\ComicSubcategoryController@destroy')->name('delete.strip.subcategory');
+	Route::name('create.category.')->group(function () {
+	 Route::post('/dashboard/categories/books', 'Dashboard\BookCategoryController@store')->name('book');
+	 Route::post('/dashboard/categories/comics', 'Dashboard\ComicCategoryController@store')->name('comic');
+	 Route::post('/dashboard/categories/albums', 'Dashboard\AlbumCategoryController@store')->name('album');
+	 Route::post('/dashboard/categories/items', 'Dashboard\CategoryController@store')->name('item');
+	});
 
 
-/* DODATNI LINKOVI */
-
-// Radi - dodatni link za svaki slucaj!
-Route::get('/dashboard/categories/{category}', function ($category) {
- 	return redirect('/dashboard/'.$category.'/categories/index');
- });
+	// other way 
+	// Route::name('create.category.')->group(function () {
+	//  Route::post('/dashboard/categories/{type}/create', 'Dashboard\CategoryController@store')->name('general');
+	// });
 
 
+	Route::name('remove.category.')->group(function () {
+	 Route::post('/dashboard/categories/books/{id}/remove', 'Dashboard\BookCategoryController@destroy')->name('book');	
+	 Route::post('/dashboard/categories/comics/{id}/remove', 'Dashboard\ComicCategoryController@destroy')->name('comic');	
+	 Route::post('/dashboard/categories/albums/{id}/remove', 'Dashboard\AlbumCategoryController@destroy')->name('album');	
+	 Route::post('/dashboard/categories/items/{id}/remove', 'Dashboard\CategoryController@destroy')->name('item');	
+	});
 
-});			// Route::group middleware => 'auth'
+	Route::name('create.subcategory.')->group(function () {
+		Route::post('/dashboard/subcategories/books', 'Dashboard\BookCategoryController@store_subcat')->name('book');
+		Route::post('/dashboard/subcategories/comics', 'Dashboard\ComicCategoryController@store_subcat')->name('comic');
+		Route::post('/dashboard/subcategories/albums', 'Dashboard\AlbumCategoryController@store_subcat')->name('album');
+		Route::post('/dashboard/subcategories/items', 'Dashboard\CategoryController@store_subcat')->name('item');
+	 
+	});
 
+	Route::name('remove.subcategory.')->group(function () {
+	 	Route::post('/dashboard/subcategories/books/{id}/remove', 'Dashboard\BookCategoryController@destroy_subcat')->name('book');
+	 	Route::post('/dashboard/subcategories/comics/{id}/remove', 'Dashboard\ComicCategoryController@destroy_subcat')->name('comic');
+		Route::post('/dashboard/subcategories/albums/{id}/remove', 'Dashboard\AlbumCategoryController@destroy_subcat')->name('album');
+		Route::post('/dashboard/subcategories/items/{id}/remove', 'Dashboard\CategoryController@destroy_subcat')->name('item');
+
+	});
+	
+
+
+
+
+});

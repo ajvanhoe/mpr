@@ -6,9 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Book as Book;
-
-use App\BookCategory as Category;
-use App\BookSubcategory as Subcategory;
+use App\BookMedia as Media;
 
 class BookController extends Controller
 {
@@ -22,110 +20,82 @@ class BookController extends Controller
 
 
 
-    public function create()
-    {
-       $categories = Category::all();
-       return view('admin.book-create')->with('categories', $categories);
-    }
- 
 
-    public function store(Request $request)
-    {
+    // store
+    public function store(Request $request, $id) {
         $this->validate($request, [
             'title'     => 'required',
-            'category'  => 'required'
-            // 'author' => 'required'
         ]);
 
-       
-        $knjiga = Book::create($request->all());
-        $id = $knjiga->id;
+        // prebacuje $request u arej
+        $input = $request->all(); 
 
-        //redirekt
-        return redirect('/dashboard/knjige/'.$id.'/media')->with('success', 'Nova knjiga dodata!');
-        
-        
-    }
-
-
-    public function show($id=null)
-    {
-
-        if(!$id) {
-            return redirect('/dashboard/knjige/index')->with('error', 'Nepoznata knjiga!');
-        }
-
-		$knjiga = Book::find($id);
-        //dd($knjiga);
-        $slike = $knjiga->media;
-        $naslovna = $slike->shift();
-
-        return view('admin.book')->with('knjiga', $knjiga)
-        						  ->with('slike', $slike)
-        						  ->with('naslovna', $naslovna);
-       
-    }
-
-
-
-    public function edit($id=null)
-    {
-        if(!$id) {
-            return redirect('/dashboard/knjige')->with('error', 'Nepoznata knjiga!');
-        }
-
-        $knjiga = Book::findOrFail($id);
-        $categories = Category::all();
-
-        $slike = $knjiga->media;
-
-        $category = Category::where('title', $knjiga->category)->limit(1)->get()->shift();
-        if ($category) {
-        $subcategories = Subcategory::where('category_id', $category->id)->get();
-        } else {
-           $subcategories = null; 
-        } 
-               
-        return view('admin.book-edit')->with('knjiga', $knjiga)
-                                       ->with('slike', $slike)
-                                       ->with('categories', $categories)
-                                       ->with('subcategories', $subcategories);
-    }
-
-     public function update(Request $request, $id)
-    {
-
-       // prebacuje $request u arej
-       $input = $request->all(); 
-     
-       // knjiga i polja u tabeli
-       $knjiga = Book::findOrFail($id);
-       $db_fields = array_keys($knjiga->getAttributes()); 
+        $resource = Book::findOrFail($id);
+        $db_fields = array_keys($resource->getAttributes()); 
 
        // moze i ovako
        //$fields = array_keys($album->getOriginal());
 
        // dodeljuje vrednosti
-       foreach ($db_fields as $field) {
+        foreach ($db_fields as $field) {
             if (array_key_exists($field, $input) && isset($input[$field])) {
-                $knjiga->$field = $input[$field];
+                $resource->$field = $input[$field];
             }
         }
 
         //save
-        $knjiga->save();
-        
-        //redirekt
-        return redirect('/dashboard/knjige/create')->with('success', 'Izmene su sačuvane!');
+        $resource->save();
+
+        //$id = $resource->id;
+        return redirect('/dashboard/create/book/')->with('success', 'Nova knjiga dodata!');
     }
 
 
-    public function destroy($id)
+
+
+    // delete
+
+    public function destroy($id) {
+        $book = Book::where('id', $id)->delete();
+        $media = Media::where('book_id', $id)->get();
+
+        foreach ($media as $entry) {
+            $file_path = public_path('media/books/'.$entry->file); 
+            if(file_exists($file_path)) {unlink($file_path);}
+            $entry->delete();
+        }
+
+        return redirect('/dashboard/books')->with('success', 'Knjiga je obrisana!');
+    }
+
+
+
+    // store media
+    public function store_media(Request $request, $id)
     {
-        $knjiga = Book::findOrFail($id);
-        $knjiga->delete();
-        return redirect('/dashboard/knjige')->with('success', 'Knjiga je obrisana!');
-        
+        $this->validate($request, [
+            'file'  => 'image|nullable|max:1024'
+        ]); 
+      
+        $media = new Media;
+
+        if ($request->hasFile('file')) {
+
+            // Get filename with the extension
+            $fileNameWithExt = $request->file('file')->getClientOriginalName();
+            // Get just filename
+            $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+            // Get just extension
+            $ext = $request->file('file')->getClientOriginalExtension();
+            // Filename to store
+            $fileNameToStore = $id.'-'.time().'-'.$filename.'.'.$ext;
+
+            $request->file('file')->move('media/books', $fileNameToStore);
+            $media->file = $fileNameToStore;
+        }
+
+        $media->book_id = $id;
+        $media->save();
     }
 
 

@@ -2,107 +2,102 @@
 
 @section('content')
 
-<div class="row">
-    <div class="col-lg-12">
-        <h3 class="page-header">Sve kategorije</h3>
+<!-- Breadcrumbs-->
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="{{route('dashboard')}}">Dashboard</a>
+    </li>
+    <li class="breadcrumb-item active">Kategorije</li>
+  </ol>
 
-        <ol class="breadcrumb" style="text-align:center;">
-            <li>
-                <a href="{{route('dashboard')}}"><i class="fa fa-dashboard"></i>  Naslovna</a>
-            </li>
-            
-            <li class="active">
-                <i class="fa fa-edit"></i> Pregled kategorija
-            </li>
-        </ol>
-    </div>
-    <!-- /.col-lg-12 -->
-</div> <!-- /.row -->
+<div class="container">
 
-
-<div class="row">
-    <div class="col-lg-8 col-lg-offset-2">
+    <div class="row justify-content-center mb-1">
         @include('partials.messages')
     </div>
-</div>
 
+    <div class="row">
+        <div class="card-deck">
+        <!-- <div class="col-md-4"> -->
+            <div class="card border-dark mb-3">
+                <div class="card-header text-white bg-primary"><strong>Knjige</strong></div>
+                <div class="card-body">
+                <h5 class="card-title">Kategorije</h5>
+                <p class="card-text">
+                  Sve pripadajuće kategorije i podkategorije
+                  <hr>
+                  @include('partials.dashboard-book-categories-list')
+                </p>
+                </div>
 
+              <div class="card-footer">
+                  <small class="text-muted"><a href="{{route('show.category.book')}}">+ dodaj novu kategoriju za knjige</a></small>
+              </div>
+            </div>
+        <!-- </div> -->
 
-<div class="row">
+        <!-- <div class="col-md-4"> -->
+            <div class="card border-dark mb-3">
+                <div class="card-header text-white bg-primary"><strong>Stripovi</strong></div>
+                <div class="card-body">
+                <h5 class="card-title">Kategorije</h5>
+                <p class="card-text">
+                  Sve pripadajuće kategorije i podkategorije
+                  <hr>
+                  @include('partials.dashboard-comic-categories-list')
+                </p>
+                </div>
 
-	<div class="col-lg-4">
-		<div class="panel panel-primary">
-	        <div class="panel-heading">
-	            <strong>Albumi</strong>
-	        </div>
-	        <!-- /.panel-heading -->
-	        <div class="panel-body">
-	        	
-	        	@foreach($album_categories as $album_category)
+              <div class="card-footer">
+                  <small class="text-muted"><a href="{{route('show.category.comic')}}">+ dodaj novu kategoriju za stripove</a></small>
+              </div>
 
-	        		<a href="{{route('index.album.subcategory', ['category' => $album_category->id])}}" class="list-group-item">
-                        <h4 class="list-group-item-heading">{{$album_category->title}}</h4>
-                        <p class="list-group-item-text">{{$album_category->description}}</p>
-   					</a>
+            </div>
+        <!-- </div> -->
 
-	        	@endforeach
+        <!-- <div class="col-md-4"> -->
+            <div class="card border-dark mb-3">
+                <div class="card-header text-white bg-primary"><strong>Albumi</strong></div>
+                <div class="card-body">
+                <h5 class="card-title">Kategorije</h5>
+                <p class="card-text">
+                  Sve pripadajuće kategorije i podkategorije
+                  <hr>
+                  @include('partials.dashboard-album-categories-list')
+                </p>
+              </div>
 
-	        	<hr>
-	        	<h5><a href="{{route('albumi.index.kategorija')}}"><small><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;Dodaj novu kategoriju</small></a></h5>
-	        </div>
-	    </div>
-	</div>
-
-	<div class="col-lg-4">
-		<div class="panel panel-green">
-	        <div class="panel-heading">
-	            <strong>Knjige</strong>
-	        </div>
-	        <!-- /.panel-heading -->
-	        <div class="panel-body">
-	        	@foreach($book_categories as $book_category)
-
-	        		<a href="{{route('index.knjiga.subcategory', ['category' => $book_category->id])}}" class="list-group-item">
-                        <h4 class="list-group-item-heading">{{$book_category->title}}</h4>
-                        <p class="list-group-item-text">{{$book_category->description}}</p>
-   					</a>
-
-	        	@endforeach
-
-	        	<hr>
-	        	<h5><a href="{{route('knjige.index.kategorija')}}"><small><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;Dodaj novu kategoriju</small></a></h5>
-
-	        </div>
-	    </div>
-	</div>
-
-	<div class="col-lg-4">
-		<div class="panel panel-yellow">
-	        <div class="panel-heading">
-	            <strong>Stripovi</strong>
-	        </div>
-	        <!-- /.panel-heading -->
-	        <div class="panel-body">
-	        	@foreach($comic_categories as $comic_category)
-
-	        		<a href="{{route('index.strip.subcategory', ['category' => $comic_category->id])}}" class="list-group-item">
-                        <h4 class="list-group-item-heading">{{$comic_category->title}}</h4>
-                        <p class="list-group-item-text">{{$comic_category->description}}</p>
-   					</a>
-
-	        	@endforeach
-
-	        	<hr>
-	        	<h5><a href="{{route('stripovi.index.kategorija')}}"><small><i class="fa fa-plus-circle"></i>&nbsp;&nbsp;Dodaj novu kategoriju</small></a></h5>
-	        </div>
-	    </div>
-	</div>
-	        	
-    	
-
-    	
-                
+              <div class="card-footer">
+                  <small class="text-muted"><a href="{{route('show.category.album')}}">+ dodaj novu kategoriju za albume</a></small>
+              </div>
+            </div>
+        <!-- </div> -->
+        </div>
     </div>
-    <!-- /.row -->
 
+    <div class="row">
+
+        <div class="col-md-8">
+            <div class="card border-dark mb-3">
+                <div class="card-header text-white bg-primary"><strong>Kolekcionarstvo</strong></div>
+                
+                <div class="card-body">
+                <h5 class="card-title">Kategorije</h5>
+                <p class="card-text">
+                  Sve pripadajuće kategorije i podkategorije
+                  <hr>
+                  @include('partials.dashboard-item-categories-list')
+                </p>
+              </div>
+
+              <div class="card-footer">
+                  <small class="text-muted"><a href="{{route('show.category.item')}}">+ dodaj novu kategoriju za antikvarnicu</a></small>
+              </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
 @endsection

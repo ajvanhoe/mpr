@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Dashboard;
 
 use App\Album as Album;
-use App\AlbumCategory as Category;
-use App\AlbumSubcategory as Subcategory;
-//use App\AlbumMedia as Media;
+use App\AlbumMedia as Media;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -21,154 +19,124 @@ class AlbumController extends Controller
     //**********************************************************************************************//
 	
 	
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-		//$albumi = Album::all();
-        //$albumi = Album::orderBy('title', 'asc')->get();
-        //return view('admin.albumi-index')->with('albumi', $albumi);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-       $categories = Category::all();
-       return view('admin.album-create')->with('categories', $categories);
-    }
-
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
+     public function store(Request $request, $id) {
         $this->validate($request, [
-            'title' 	=> 'required',
-			'type'		=> 'required',
-            'category'  => 'required'
+            'title'     => 'required',
         ]);
 
-       
-        $album = Album::create($request->all());
-        $id = $album->id;
+        // prebacuje $request u arej
+        $input = $request->all(); 
 
-        //redirekt
-		return redirect('/dashboard/albumi/'.$id.'/media')->with('success', 'Novi album dodat!');
-		
-		
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Album  $album
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id=null)
-    {
-
-        if(!$id) {
-            return redirect('/dashboard/albumi/index')->with('error', 'Nepoznat album!');
-        }
-
-		$album = Album::find($id);
-        $slike = $album->media;
-        //dd($album->media);
-        $naslovna = $slike->shift();
-
-        return view('admin.album')->with('album', $album)->with('slike', $slike)->with('naslovna', $naslovna);
-       
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Album  $album
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id=null)
-    {
-        if(!$id) {
-            return redirect('/dashboard/albumi/index')->with('error', 'Nepoznat album!');
-        }
-
-		$album = Album::findOrFail($id);
-        $categories = Category::all();
-
-        $slike = $album->media;
-
-        $category = Category::where('title', $album->category)->limit(1)->get()->shift();
-        if ($category) {
-        $subcategories = Subcategory::where('category_id', $category->id)->get();
-        } else {
-           $subcategories = null; 
-        }       
-      	return view('admin.album-edit')->with('album', $album)
-                                       ->with('slike', $slike)
-                                       ->with('categories', $categories)
-                                       ->with('subcategories', $subcategories);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Album  $album
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-
-       // prebacuje $request u arej
-       $input = $request->all(); 
-	 
-       // album i polja u tabeli
-	   $album = Album::findOrFail($id);
-       $db_fields = array_keys($album->getAttributes()); 
+        $resource = Album::findOrFail($id);
+        $db_fields = array_keys($resource->getAttributes()); 
 
        // moze i ovako
        //$fields = array_keys($album->getOriginal());
 
        // dodeljuje vrednosti
-       foreach ($db_fields as $field) {
+        foreach ($db_fields as $field) {
             if (array_key_exists($field, $input) && isset($input[$field])) {
-                $album->$field = $input[$field];
+                $resource->$field = $input[$field];
             }
         }
 
-    	//save
-		$album->save();
-		
-		//redirekt
-		return redirect('/dashboard/albumi/create')->with('success', 'Album je sačuvan!');
-	}
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Album  $album
-     * @return \Illuminate\Http\Response
-     */
-
-    public function destroy($id)
-    {
-		$album = Album::findOrFail($id);
-		$album->delete();
-		return redirect('/dashboard/albumi')->with('success', 'Album obrisan!');
-		
+        //save
+        $resource->save();
+        return redirect('/dashboard/create/album/'.$resource->id)->with('success', 'Novi album je dodat!');
     }
 
+
+
+
+
+
+    // edit
+
+    // public function edit(Request $request, $id) {
+    //      $this->validate($request, [
+    //         'title'     => 'required',
+    //     ]);
+
+    //     // prebacuje $request u arej
+    //     $input = $request->all(); 
+
+    //     $resource = Album::findOrFail($id);
+    //     $db_fields = array_keys($resource->getAttributes()); 
+
+    //    // moze i ovako
+    //    //$fields = array_keys($album->getOriginal());
+
+    //    // dodeljuje vrednosti
+    //     foreach ($db_fields as $field) {
+    //         if (array_key_exists($field, $input) && isset($input[$field])) {
+    //             $resource->$field = $input[$field];
+    //         }
+    //     }
+
+    //     $resource->save();
+    //     return redirect('/dashboard/albums/'.$resource->id)->with('success', 'Izmenjeno!');
+    // }
+
+
+
+
+    // delete
+
+    public function destroy($id) {
+        $album = Album::where('id', $id)->delete();
+        $media = Media::where('album_id', $id)->get();
+
+        foreach ($media as $entry) {
+            $file_path = public_path('media/albums/'.$entry->file); 
+            if(file_exists($file_path)) {unlink($file_path);}
+            $entry->delete();
+        }
+
+        return redirect('/dashboard/albums')->with('success', 'Album je obrisan!');
+    }
+
+
+    /************************/
+
+
+
+
+    // store media
+    public function store_media(Request $request, $id)
+    {
+        $this->validate($request, [
+            'file'  => 'image|nullable|max:1024'
+        ]); 
+      
+        $media = new Media;
+
+        if ($request->hasFile('file')) {
+
+            // Get filename with the extension
+            $fileNameWithExt = $request->file('file')->getClientOriginalName();
+            // Get just filename
+            $filename = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+            // Get just extension
+            $ext = $request->file('file')->getClientOriginalExtension();
+            // Filename to store
+            $fileNameToStore = $id.'-'.time().'-'.$filename.'.'.$ext;
+
+            $request->file('file')->move('media/albums', $fileNameToStore);
+            $media->file = $fileNameToStore;
+        }
+
+        $media->album_id = $id;
+        $media->save();
+    }
+
+
+
+
+    // delete media
+    // public function delete_media(Request $request) {
+
+
+    // }
 
 
 

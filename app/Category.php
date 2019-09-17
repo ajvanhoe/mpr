@@ -6,28 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-	// private $type;
-    protected $table;
+	protected $table = 'categories';
 
     protected $fillable = [
-        'Albumi', 
-        'Knjige',
-        'Stripovi',
-        
+        'title',
+        //'description'
     ];
 
     public $timestamps = false;
+    
+     		//  one-to-many: hasMany prvo ide forein pa local
+    public function items() {
+        return $this->hasMany('App\Item', 'category', 'title');
+    }
 
+     public function subcats() {
+        return $this->hasMany('App\Subcategory', 'category_id', 'id'); 
+    }
 
-
-    // static function setType($type){
-    // 	$this->$type = $type;
-    // }
-
-
-
- 
-
-  
 
 }

@@ -15,9 +15,9 @@ class CreateAlbumCategoriesTable extends Migration
     {
         Schema::create('album_categories', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('title');
-            $table->string('description')->nullable()->default('nema'); 
-            $table->timestamps();
+            $table->string('title')->unique();
+            //$table->string('description')->nullable()->default('nema'); 
+            //$table->timestamps();
         });
     }
 

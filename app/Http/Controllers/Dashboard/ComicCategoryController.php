@@ -6,45 +6,31 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\ComicCategory as Category;
-use App\ComicSubategory as Subcategory;
+use App\ComicSubcategory as Subcategory;
 
 class ComicCategoryController extends Controller
 {
-    public function index()
+  
+    public function __construct()
     {
-         $categories = Category::all();
-         return view('admin.comic-categories')->with('categories', $categories);
+        $this->middleware('auth');
     }
+
+    //**********************************************************************************************//
+
 
 
     public function store(Request $request)
     {
         
         $this->validate($request, [
-            'title'     => 'required',
+            'title'     => ['required', 'unique:comic_categories']
         ]);
 
         Category::create($request->all());
-        return redirect('/dashboard/stripovi/categories/index')->with('success', 'Nova kategorija dodata!');
+        return redirect('/dashboard/categories/comics')->with('success', 'Nova kategorija dodata!');
     }
 
-    public function update(Request $request, $id)
-    {
-        $category = Category::findOrFail($id);
-     
-              
-        if($request->title !== null){
-        $category->title = $request->title;
-        }
-        
-        $category->description = $request->description;
-       
-
-        $category->save();
-
-        return redirect('/dashboard/stripovi/categories/'.$id.'/subcategories')->with('success', 'Kategorija je promenjena!');
-
-    }
 
     public function destroy($id)
     {
@@ -52,13 +38,35 @@ class ComicCategoryController extends Controller
         $subcats = Subcategory::where('category_id', $id)->get();
 
         foreach($subcats as $subcat){
-        $subcat->delete();
+        	$subcat->delete();
         }
 
-        $category = Category::findOrFail($id);
-        $category->delete();
+	        $category = Category::findOrFail($id);
+	        $category->delete();
 
-        return redirect('/dashboard/stripovi/categories/index')->with('success', 'Kategorija obrisana!');
+        return redirect('/dashboard/categories/comics')->with('success', 'Kategorija obrisana!');
+
+    }
+
+    public function store_subcat(Request $request)
+    {
+        
+        $this->validate($request, [
+            'title'         => 'required',
+            'category_id'   => 'required',
+        ]);
+
+        Subcategory::create($request->all());
+        return redirect('/dashboard/categories/comics')->with('success', 'Nova podkategorija dodata!');
+    }
+
+
+    public function destroy_subcat($id)
+    {
+        $subcategory = Subcategory::findOrFail($id);
+        $subcategory->delete();
+
+        return redirect('/dashboard/categories/comics')->with('success', 'Podkategorija obrisana!');
 
     }
 }
